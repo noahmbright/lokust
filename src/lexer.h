@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstddef>
+#include <iostream>
 #include <vector>
 
 enum class TokenType {
@@ -8,19 +9,29 @@ enum class TokenType {
 
   Identifier,
   Number,
+  Analyze, // fn
 
   // types
+  Unsigned,
   Int,
+  Long,
+  Loong,
 
   // type modifiers
   Cheech, // const
+  Choong,
+  Paul,
 
   // control flow
-  Edge,  // while
-  Krink, // for
+  Edge, // for
+  Until,
+  Finishes,
+  Krink, // while
   And,
   Or,
   If,
+  Joever,
+  Jart,
 
   // oop
   Horse,    // class
@@ -30,6 +41,7 @@ enum class TokenType {
   Plus,
   PlusPlus,
   Minus,
+  Arrow,
   MinusMinus,
   PlusEquals,
   MinusEquals,
@@ -61,6 +73,7 @@ struct Token {
   unsigned row, column;
   TokenType type;
   const char *identifier;
+  const char *position;
   size_t length;
 };
 
@@ -77,3 +90,5 @@ private:
   Token lex_next_token(TokenType type, const char *identifier = nullptr,
                        size_t length = 0);
 };
+
+void print_token_identifier(Token t);

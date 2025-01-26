@@ -12,6 +12,7 @@ Token Lexer::lex_next_token(TokenType type, const char *identifier,
   t.type = type;
   t.identifier = identifier;
   t.length = length;
+  t.position = start_of_current;
 
   return t;
 }
@@ -43,13 +44,11 @@ std::vector<Token> Lexer::lex_file(const char *file) {
 
   auto make_keyword_or_identifier =
       [&](size_t offset, const std::string &suffix, TokenType type) {
-        size_t length = position - start_of_current - offset;
-        std::cout << *position << ' ' << *start_of_current << ' ' << length
-                  << std::endl;
+        size_t length = position - start_of_current;
 
-        if (length == suffix.size() &&
+        if (length - offset == suffix.size() &&
             memcmp(suffix.c_str(), (void *)(start_of_current + offset),
-                   length) == 0) {
+                   suffix.size()) == 0) {
           return lex_next_token(type);
         }
 
@@ -68,6 +67,11 @@ std::vector<Token> Lexer::lex_file(const char *file) {
         advance_position();
 
       switch (*start_of_current) {
+        // analyze
+      case 'a':
+        tokens.push_back(
+            make_keyword_or_identifier(1, "nalyze", TokenType::Analyze));
+        break;
         // cheech
       case 'c':
         tokens.push_back(
@@ -76,6 +80,11 @@ std::vector<Token> Lexer::lex_file(const char *file) {
         // edge
       case 'e':
         tokens.push_back(make_keyword_or_identifier(1, "dge", TokenType::Edge));
+        break;
+        // finishes
+      case 'f':
+        tokens.push_back(
+            make_keyword_or_identifier(1, "inishes", TokenType::Finishes));
         break;
         // horse
       case 'h':
@@ -98,10 +107,29 @@ std::vector<Token> Lexer::lex_file(const char *file) {
         }
         break;
       }
+
+      case 'j': {
+        switch (start_of_current[1]) {
+        case 'a':
+          tokens.push_back(
+              make_keyword_or_identifier(1, "art", TokenType::Jart));
+          break;
+        case 'o':
+          tokens.push_back(
+              make_keyword_or_identifier(1, "oever", TokenType::Joever));
+          break;
+        }
+        break;
+      }
         // krink
       case 'k':
         tokens.push_back(
             make_keyword_or_identifier(1, "rink", TokenType::Krink));
+        break;
+        // until
+      case 'u':
+        tokens.push_back(
+            make_keyword_or_identifier(1, "ntil", TokenType::Until));
         break;
 
       default:
@@ -156,6 +184,10 @@ std::vector<Token> Lexer::lex_file(const char *file) {
       case '=':
         advance_position();
         tokens.push_back(lex_next_token(TokenType::MinusEquals));
+        break;
+      case '>':
+        advance_position();
+        tokens.push_back(lex_next_token(TokenType::Arrow));
         break;
       default:
         tokens.push_back(lex_next_token(TokenType::Minus));
@@ -262,4 +294,9 @@ std::vector<Token> Lexer::lex_file(const char *file) {
   }   // end main loop
 
   return tokens;
+}
+
+void print_token_identifier(Token t) {
+  std::cout << "Printing a token identifier: "
+            << std::string(t.identifier, t.length) << std::endl;
 }
