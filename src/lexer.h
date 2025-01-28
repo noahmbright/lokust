@@ -49,6 +49,8 @@ enum class TokenType {
   AsteriskEquals,
   Divided,
   DividedEquals,
+  Modulo,
+  ModuloEquals,
 
   Equals,
   EqualsEquals,

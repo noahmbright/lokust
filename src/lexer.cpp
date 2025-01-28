@@ -38,7 +38,7 @@ std::vector<Token> Lexer::lex_file(const char *file) {
     return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_';
   };
 
-  auto advance_position = [&]() { position++, row++; };
+  auto advance_position = [&]() { position++, column++; };
 
   auto current = [&]() { return *position; };
 
@@ -253,6 +253,21 @@ std::vector<Token> Lexer::lex_file(const char *file) {
         break;
       }
 
+      break;
+    }
+
+    case '%': {
+      advance_position();
+      switch (current()) {
+      case '=':
+        advance_position();
+        tokens.push_back(lex_next_token(TokenType::ModuloEquals));
+        break;
+
+      default:
+        tokens.push_back(lex_next_token(TokenType::Modulo));
+        break;
+      }
       break;
     }
 
