@@ -69,6 +69,8 @@ enum class TokenType {
   LessThanEquals,
   GreaterThanEquals,
   Semicolon,
+  Comma,
+  Dot,
 };
 
 struct Token {

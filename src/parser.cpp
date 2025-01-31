@@ -1,5 +1,6 @@
 #include "parser.h"
 #include "lexer.h"
+#include <__iterator/next.h>
 #include <cassert>
 #include <iostream>
 
@@ -172,7 +173,7 @@ Type Parser::parse_type() {
   Type t;
   t.base = BaseType::Empty;
 
-  if (!is_type_keyword() || is_type_modifier()) {
+  if (!(is_type_keyword() || is_type_modifier())) {
     return t;
   }
 
@@ -210,7 +211,8 @@ Type Parser::parse_type() {
 }
 
 // function declaration:
-//  analyze <identifier> (-> <return type>)? jart <body> joever
+//  analyze <identifier> "(" (type identifier),?  ")" (-> <return type>)? jart
+//  <body> joever
 ASTNode *Parser::parse_function() {
   assert(current_token->type == TokenType::Analyze);
 
@@ -226,6 +228,48 @@ ASTNode *Parser::parse_function() {
 
   copy_token_identifier_to_ast_node(function_node, current_token);
   // print_token_identifier(*current_token);
+
+  if (next_token()->type != TokenType::LParen) {
+    emit_error("Oh! Why don't you just begin this function's parameter list "
+               "with a \"(\"!\n");
+  } else
+    std::cerr << "Got lparen where expected\n";
+  next_token();
+
+  if (!(is_type_keyword() || is_type_modifier() ||
+        current_token->type == TokenType::RParen)) {
+    emit_error("Oh! Why don't you just tell me what the type of the parameters "
+               "of this function are or close the \"(\" with a \")\"!\n");
+    while (current_token->type != TokenType::Jart &&
+           current_token->type != TokenType::Joever &&
+           current_token->type != TokenType::Eof) {
+      next_token();
+    }
+  }
+
+  while (is_type_keyword() || is_type_modifier()) {
+    ASTNode param_node;
+    param_node.type = parse_type();
+    if (current_token->type != TokenType::Identifier) {
+      emit_error("Oh! Why don't you just tell me what the name of this "
+                 "parameter is!\n");
+    }
+    copy_token_identifier_to_ast_node(&param_node, current_token);
+    function_node->function_parameters.push_back(param_node);
+
+    if (next_token()->type == TokenType::Comma) {
+      next_token();
+      if (!(is_type_keyword() || is_type_modifier())) {
+        emit_error("Oh! I was expecting a type after this "
+                   "comma in the parameter list!\n");
+      }
+    } else if (current_token->type == TokenType::RParen) {
+      break;
+    } else {
+      emit_error("Oh! Why don't you just end this function's parameter list "
+                 "with a \")\", or continue it with a \",\"!\n");
+    }
+  }
 
   if (next_token()->type == TokenType::Arrow) {
     next_token();

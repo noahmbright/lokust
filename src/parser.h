@@ -33,6 +33,8 @@ struct ASTNode {
 
   ASTNode *lhs;
   ASTNode *rhs;
+
+  std::vector<ASTNode> function_parameters;
 };
 
 using Scope = std::unordered_map<std::string, const ASTNode *>;

@@ -301,6 +301,14 @@ std::vector<Token> Lexer::lex_file(const char *file) {
       advance_position();
       tokens.push_back(lex_next_token(TokenType::Semicolon));
       break;
+    case '.':
+      advance_position();
+      tokens.push_back(lex_next_token(TokenType::Dot));
+      break;
+    case ',':
+      advance_position();
+      tokens.push_back(lex_next_token(TokenType::Comma));
+      break;
     case '\0':
       tokens.push_back(lex_next_token(TokenType::Eof));
       break;

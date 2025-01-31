@@ -3,7 +3,7 @@
 #include <gtest/gtest.h>
 
 TEST(Parser, empty_function) {
-  const char *file = "analyze function -> int\n"
+  const char *file = "analyze function ()-> int\n"
                      "jart joever ";
 
   Lexer l;
@@ -12,6 +12,54 @@ TEST(Parser, empty_function) {
   auto nodes = p.parse_tokens();
 
   EXPECT_EQ(nodes.size(), 1);
+  EXPECT_EQ(nodes.front()->type.base, BaseType::Int);
+  EXPECT_TRUE(p.is_at_end());
+}
+
+TEST(Parser, one_int_param) {
+  const char *file = "analyze function (int x)-> int\n"
+                     "jart joever ";
+
+  Lexer l;
+  auto tokens = l.lex_file(file);
+  Parser p(tokens);
+  auto nodes = p.parse_tokens();
+
+  EXPECT_EQ(nodes.size(), 1);
+  EXPECT_EQ(nodes.front()->function_parameters.size(), 1);
+  EXPECT_EQ(nodes.front()->function_parameters.front().type.base,
+            BaseType::Int);
+  auto x_node = nodes.front()->function_parameters.front();
+  EXPECT_EQ(x_node.type.base, BaseType::Int);
+  EXPECT_STREQ(std::string(x_node.identifier, x_node.identifier_length).c_str(),
+               "x");
+
+  EXPECT_EQ(nodes.front()->type.base, BaseType::Int);
+  EXPECT_TRUE(p.is_at_end());
+}
+
+TEST(Parser, two_int_params) {
+  const char *file = "analyze function (int x, int y)-> int\n"
+                     "jart joever ";
+
+  Lexer l;
+  auto tokens = l.lex_file(file);
+  Parser p(tokens);
+  auto nodes = p.parse_tokens();
+
+  EXPECT_EQ(nodes.size(), 1);
+  EXPECT_EQ(nodes.front()->function_parameters.size(), 2);
+
+  auto x_node = nodes.front()->function_parameters.front();
+  EXPECT_EQ(x_node.type.base, BaseType::Int);
+  EXPECT_STREQ(std::string(x_node.identifier, x_node.identifier_length).c_str(),
+               "x");
+
+  auto y_node = nodes.front()->function_parameters.back();
+  EXPECT_EQ(y_node.type.base, BaseType::Int);
+  EXPECT_STREQ(std::string(y_node.identifier, y_node.identifier_length).c_str(),
+               "y");
+
   EXPECT_EQ(nodes.front()->type.base, BaseType::Int);
   EXPECT_TRUE(p.is_at_end());
 }
